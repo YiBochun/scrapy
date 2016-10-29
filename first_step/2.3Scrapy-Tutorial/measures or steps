@@ -1,0 +1,57 @@
+This tutorial will walk you through these tasks:
+1. Creating a new Scrapy project
+2. Writing a spider to crawl a site and extract data
+3. Exporting the scraped data using the command line
+4. Changing spider to recursively递归 follow links
+5. Using spider arguments属性
+
+一、Creating a new Scrapy project
+Enter a directory where you’d like to store your code and run:
+在命令行执行 scrapy startproject 文件夹名，在该文件夹下创建了目录树。
+
+二、first Spider
+Spiders are classes that you define and that Scrapy uses to scrape information from a website (or a group of websites).
+1.They must subclass scrapy.Spider
+2.and define the initial requests to make,
+3.optionally how to follow links in the pages,怎么递归？
+4.and how to parse the downloaded page content to extract data.
+
+三、Exporting the scraped data using the command line
+To put our spider to work, go to the project’s top level directory and run:
+cmd: scrapy crawl the-name-in-spiderClass which we define(类中的属性name)
+Extracting data：
+    The best way to learn how to extract data with Scrapy is trying selectors using the shell Scrapy shell.
+     Run: scrapy shell url(不要对url用冒号引起来)
+     shell不要在工程目录下，可以cd..回到上一级目录。
+
+     1.Using the shell, you can try selecting elements using CSS with the response object:
+     >>response.css('title')
+     [<Selector xpath='descendant-or-self::title' data='<title>Quotes to Scrape</title>'>]
+
+     response.css().extract()抽取数据，.extract() is a list
+     >>response.css('title::text').extract()
+     ['Quotes to Scrape']
+     >>onse.css('title::text').extract_first()或者 response.css('title::text')[0].extract() 来抽取第一个内容，推荐第一个
+     >>response.css('title::text').re(r'Quotes.*')
+     >>response.css('title::text').re(r'(\w+) to (\w+)')
+
+     2.XPath: a brief intro
+     >>response.xpath('//title')
+     >>response.xpath('//title/text()').extract_first()
+     XPath expressions are very powerful, and are the foundation of Scrapy Selectors.
+  #Extracting quotes and authors
+    scrapy shell http://quotes.toscrape.com
+    >>response.css("div.quote")
+    >>quote = response.css("div.quote")[0]
+    >>author = quote.css("small.author::text").extract_first()
+    >>tags = quote.css("div.tags a.tag::text").extract()# 这里是两级标签
+
+   #Extracting data in our spider
+    A Scrapy spider typically generates many dictionaries containing the data extracted from the page.
+    To do that, we use the yield Python keyword in the callback.
+
+    储存数据
+    scrapy crawl quotes -o quotes.json
+
+    following links
+    递归，循环处理链接：绝对路径，回调函数
